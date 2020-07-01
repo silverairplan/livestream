@@ -1,0 +1,24 @@
+coturns:
+  authRealm: Example
+  authSecret: "NotReallyVerySecret!"
+  # Create with:
+  # kubectl create secret tls example-tls-secret --key=example.key --cert=example.crt
+  tlsSecretName: example-tls-secret
+  turnServers: "turns:media.example.com:443?transport=tcp"
+service:
+  # Needs:
+  # kubectl label node <MY-NODE> hostNetworkIP=1.2.3.4
+  hostNetworkIP: 1.2.3.4
+ingress:
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+  enabled: true
+  hosts:
+  - msbe.example.com
+  tls:
+    - secretName: msbe-example-secret
+      hosts:
+      - msbe.example.com

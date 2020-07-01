@@ -1,0 +1,93 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "mediasoup-broadcast-example.fullname" . }}
+  labels:
+    app: {{ template "mediasoup-broadcast-example.name" . }}
+    chart: {{ template "mediasoup-broadcast-example.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "mediasoup-broadcast-example.name" . }}
+      release: {{ .Release.Name }}
+{{- if .Values.service.hostNetworkIP }}
+  strategy:
+    type: Recreate
+{{- end }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "mediasoup-broadcast-example.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: HOST
+              value: 0.0.0.0
+            - name: PORT
+              value: {{ .Values.service.containerPort | quote }}
+          {{- if .Values.service.hostNetworkIP }}
+            - name: RTC_ANNOUNCED_IPV4
+              value: {{ .Values.service.hostNetworkIP }}
+          {{- end }}
+          {{- if .Values.ingress.enabled }}
+            - name: INGRESS_PATH
+              value: {{ .Values.ingress.path | quote }}
+          {{- end }}
+          {{- if .Values.coturns.turnServers }}
+            - name: TURN_SERVERS
+              value: {{ .Values.coturns.turnServers | quote }}
+          {{- end }}
+          {{- if .Values.coturns.authSecret }}
+            - name: TURN_AUTH_KEY
+              value: {{ .Values.coturns.authSecret | quote }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.containerPort }}
+              protocol: TCP
+          {{- if .Values.service.rtpPort }}
+          # FIXME: Just a sketch of what one day may be supported.
+            - name: rtp-udp
+              containerPort: {{ .Values.service.rtpPort }}
+              protocol: UDP
+            - name: rtp-tcp
+              containerPort: {{ .Values.service.rtpPort }}
+              protocol: TCP
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.service.hostNetworkIP }}
+      hostNetwork: true
+    {{- end }}
+    {{- if or .Values.service.hostNetworkIP .Values.nodeSelector }}
+      nodeSelector:
+    {{- end }}
+    {{- if .Values.service.hostNetworkIP }}
+        hostNetworkIP: {{ .Values.service.hostNetworkIP }}
+    {{- end }}
+    {{- with .Values.nodeSelector }}
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
