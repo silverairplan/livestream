@@ -10,6 +10,7 @@
   "author": "michael@fig.org",
   "license": "ISC",
   "dependencies": {
+    "custom-env": "^2.0.1",
     "express": "^4.16.3",
     "mediasoup": "^2.6.17",
     "ws": "^6.1.0"

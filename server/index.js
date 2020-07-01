@@ -10,17 +10,19 @@ const wsServer = require('./wsserver');
 
 const app = express();
 let server;
+require ('custom-env').env('staging')
+console.log(process.env.HTTPS_HOST);
 
 if (process.env.HTTPS_HOST) {
     // HTTPS server.
     const base = process.env.HTTPS_HOST;
     const PORT = Number(process.env.PORT) || 443;
     server = require('https').createServer({
-        cert: fs.readFileSync(`${__dirname}/certs/${base}.crt`),
-        key: fs.readFileSync(`${__dirname}/certs/${base}.key`),
+        cert: fs.readFileSync(`${__dirname}/certs/fullchain.pem`),
+        key: fs.readFileSync(`${__dirname}/certs/privkey.pem`),
     }, app);
     console.log(`Listening for HTTPS on ${process.env.HTTPS_HOST || '0.0.0.0'}:${PORT}`);
-    server.listen(PORT, process.env.HTTPS_HOST);
+    server.listen(PORT,process.env.HTTPS_HOST);
 }
 else {
     // HTTP server.
