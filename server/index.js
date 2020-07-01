@@ -27,7 +27,7 @@ else {
     const PORT = Number(process.env.PORT) || 8080;
     server = require('http').createServer(app);
     console.log(`Listening for HTTP on ${process.env.HOST || '127.0.0.1'}:${PORT}`);
-    server.listen(PORT, '3.127.36.179');
+    server.listen(PORT, '172.31.34.146');
 }
 
 const exst = express.static(`${__dirname}/../app`);
