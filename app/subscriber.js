@@ -19,6 +19,7 @@ function startStream(peer) {
         consumer.enableStats(1000);
         consumer.receive(transport)
             .then(function receiveTrack(track) {
+                console.log('track',track);
                 stream.addTrack(track);
                 consumer.on('close', function closeConsumer() {
                     // Remove the old track.
@@ -70,6 +71,7 @@ function subscribeClick() {
             // ... or if it already exists.
             if (ps.peers[0]) {
                 console.log('Existing peer detected:', ps.peers[0].name);
+                console.log('stream',startStream(ps.peers[0]));
                 setVideoSource(video, startStream(ps.peers[0]));
             }
             else {
