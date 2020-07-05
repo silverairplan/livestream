@@ -143,6 +143,7 @@ function pubsubClient(channel, password, isPublisher) {
                     console.log(turnServers);
                 }
 
+                console.log('turnserver',turnServers);
                 room = new ms.Room({
                     requestTimeout: 8000,
                     turnServers: turnServers,
