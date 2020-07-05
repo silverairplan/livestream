@@ -139,6 +139,8 @@ function pubsubClient(channel, password, isPublisher) {
                         });
                         return Object.assign({}, srv, {urls: urls});
                     });
+
+                    console.log(turnServers);
                 }
 
                 room = new ms.Room({
