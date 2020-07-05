@@ -5,8 +5,12 @@ const crypto = require('crypto');
 
 const SEND_PASSWORD = process.env.SEND_PASSWORD || 'ChangeMe';
 const RECV_PASSWORD = process.env.RECV_PASSWORD || 'NotSecret';
-const TURN_SERVERS = process.env.TURN_SERVERS ? process.env.TURN_SERVERS.split(',') : [];
+
+const TURN_SERVERS = process.env.TURN_SERVERS ? process.env.TURN_SERVERS.split(',') : 'turns:172.31.34.146:3376';
+
+
 const PASSWORD_EXPIRY_SECONDS = 300;
+
 
 
 function getTurnServers(urls, key) {
@@ -26,7 +30,7 @@ function getTurnServers(urls, key) {
     }
     else {
         // No credentials;
-        return [{urls: urls}];
+        return [{urls: urls,username:"admin",credential:"turn"}];
     }
 };
 
@@ -51,6 +55,7 @@ function authorize(addr, channel, request) {
             return Promise.resolve(getPayload('publish'));
         }
     }
+
     else {
         return Promise.reject(Error(addr + ' Unknown kind ' + request.kind));
     }
