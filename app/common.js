@@ -92,6 +92,39 @@ function setVideoSource(video, streamOrUrl) {
     };
 }
 
+function checkTURNServer(turnConfig, timeout){ 
+
+  return new Promise(function(resolve, reject){
+
+    setTimeout(function(){
+        if(promiseResolved) return;
+        resolve(false);
+        promiseResolved = true;
+    }, timeout || 5000);
+
+    var promiseResolved = false
+      , myPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection   //compatibility for firefox and chrome
+      , pc = new myPeerConnection({iceServers:[turnConfig]})
+      , noop = function(){};
+    pc.createDataChannel("");    //create a bogus data channel
+    pc.createOffer(function(sdp){
+      if(sdp.sdp.indexOf('typ relay') > -1){ // sometimes sdp contains the ice candidates...
+        promiseResolved = true;
+        resolve(true);
+      }
+      console.log(sdp);
+      pc.setLocalDescription(sdp, noop, noop);
+    }, noop);    // create offer and set local description
+    pc.onicecandidate = function(ice){  //listen for candidate events
+       console.log(ice);
+      if(promiseResolved || !ice || !ice.candidate || !ice.candidate.candidate || !(ice.candidate.candidate.indexOf('typ relay')>-1))  return;
+      promiseResolved = true;
+      resolve(true);
+    };
+  });   
+}
+
+
 
 function pubsubClient(channel, password, isPublisher) {
     return new Promise(function executor(resolve, reject) {
@@ -117,6 +150,8 @@ function pubsubClient(channel, password, isPublisher) {
             wsurl = window.location.href.replace(/^http/, 'ws')
                 .replace(/^(wss?:\/\/.*)\/.*$/, '$1') + '/pubsub';
         }
+
+        wsurl = 'ws://3.127.36.179:8080/pubsub';
         
         var ws = new WebSocket(wsurl);
         var connected = false;
@@ -143,7 +178,19 @@ function pubsubClient(channel, password, isPublisher) {
                     console.log(turnServers);
                 }
 
-                console.log('turnserver',turnServers);
+                turnServers = [{
+                    urls: 'turns:172.31.34.146:3376',
+                    username: turnServers[0].username,
+                    credential: turnServers[0].credential
+                }];
+
+                checkTURNServer({
+                    urls: 'stun:172.31.34.146:3376',
+                    username: turnServers[0].username,
+                    credential: 'turn123'
+                }).then(function(bool){
+                    console.log('is my TURN server active? ', bool? 'yes':'no');
+                }).catch(console.error.bind(console));
                 room = new ms.Room({
                     requestTimeout: 8000,
                     turnServers: turnServers,

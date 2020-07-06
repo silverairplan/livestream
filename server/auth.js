@@ -30,7 +30,8 @@ function getTurnServers(urls, key) {
     }
     else {
         // No credentials;
-        return [{urls: urls,username:"admin",credential:"turn"}];
+         const hmac = crypto.createHmac('sha1', 'turn').update('admin').digest('base64');
+        return [{urls: urls,username:"admin",credential:hmac}];
     }
 };
 

@@ -123,7 +123,7 @@ function captureStreams() {
             constraints.audio = true;
         }
         if (gumVideo) {
-            constraints.video = {facingMode: gumVideo === 'env' ? 'environment' : gumVideo};
+            constraints.video = true;
         }
         
         navigator.mediaDevices.getUserMedia(constraints)

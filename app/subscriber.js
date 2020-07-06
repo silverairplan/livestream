@@ -11,10 +11,12 @@ function startStream(peer) {
             console.log('consumer', consumer.id, 'not supported');
             return;
         }
+
         if (consumer.kind === 'video') {
             autoAdjustProfile = makeAutoAdjustProfile(consumer);
             autoAdjustProfile();
         }
+
         consumer.on('stats', showStats);
         consumer.enableStats(1000);
         consumer.receive(transport)
